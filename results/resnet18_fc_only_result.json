@@ -1,0 +1,7 @@
+{
+  "experiment": "ResNet18 pretrained - FC only",
+  "accuracy": 0.7482758620689656,
+  "precision": 0.7969529511882453,
+  "recall": 0.7448063973063972,
+  "f1_score": 0.7435877634603086
+}
