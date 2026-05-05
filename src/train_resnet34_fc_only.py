@@ -20,7 +20,7 @@ RESULT_DIR = "results"
 
 BATCH_SIZE = 32
 NUM_EPOCHS = 5
-LEARNING_RATE = 0.0001
+LEARNING_RATE = 0.001
 IMAGE_SIZE = 224
 
 
@@ -73,19 +73,19 @@ def main():
             image_datasets["train"],
             batch_size=BATCH_SIZE,
             shuffle=True,
-            num_workers=0
+            num_workers=2
         ),
         "val": DataLoader(
             image_datasets["val"],
             batch_size=BATCH_SIZE,
             shuffle=False,
-            num_workers=0
+            num_workers=2
         ),
         "test": DataLoader(
             image_datasets["test"],
             batch_size=BATCH_SIZE,
             shuffle=False,
-            num_workers=0
+            num_workers=2
         )
     }
 
@@ -98,25 +98,18 @@ def main():
     with open(os.path.join(MODEL_DIR, "class_names.json"), "w", encoding="utf-8") as f:
         json.dump(class_names, f, ensure_ascii=False, indent=2)
 
-    # Load pretrained ResNet18
-    model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+    model = models.resnet34(weights=models.ResNet34_Weights.DEFAULT)
 
-    # Exp 2: Full fine-tuning
-    # 전체 레이어를 학습 가능하게 설정
     for param in model.parameters():
-        param.requires_grad = True
+        param.requires_grad = False
 
-    # 기존 ImageNet 1000-class classifier를 포켓몬 클래스 수에 맞게 교체
     num_features = model.fc.in_features
     model.fc = nn.Linear(num_features, num_classes)
 
     model = model.to(device)
 
     criterion = nn.CrossEntropyLoss()
-
-    # 전체 모델을 fine-tuning하므로 model.parameters() 사용
-    # pretrained weight를 크게 망가뜨리지 않기 위해 learning rate는 작게 설정
-    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    optimizer = optim.Adam(model.fc.parameters(), lr=LEARNING_RATE)
 
     best_model_weights = copy.deepcopy(model.state_dict())
     best_val_acc = 0.0
@@ -177,7 +170,7 @@ def main():
 
     model.load_state_dict(best_model_weights)
 
-    model_path = os.path.join(MODEL_DIR, "resnet18_full_best.pth")
+    model_path = os.path.join(MODEL_DIR, "resnet34_fc_only_best.pth")
     torch.save(model.state_dict(), model_path)
 
     print(f"\nBest validation accuracy: {best_val_acc:.4f}")
@@ -194,9 +187,9 @@ def save_learning_curve(train_losses, val_losses, train_accs, val_accs):
     plt.plot(val_losses, label="Validation Loss")
     plt.xlabel("Epoch")
     plt.ylabel("Loss")
-    plt.title("ResNet18 Full Fine-tuning Loss Curve")
+    plt.title("ResNet34 FC Only Loss Curve")
     plt.legend()
-    plt.savefig(os.path.join(RESULT_DIR, "resnet18_full_loss_curve.png"))
+    plt.savefig(os.path.join(RESULT_DIR, "resnet34_fc_only_loss_curve.png"))
     plt.close()
 
     plt.figure()
@@ -204,9 +197,9 @@ def save_learning_curve(train_losses, val_losses, train_accs, val_accs):
     plt.plot(val_accs, label="Validation Accuracy")
     plt.xlabel("Epoch")
     plt.ylabel("Accuracy")
-    plt.title("ResNet18 Full Fine-tuning Accuracy Curve")
+    plt.title("ResNet34 FC Only Accuracy Curve")
     plt.legend()
-    plt.savefig(os.path.join(RESULT_DIR, "resnet18_full_accuracy_curve.png"))
+    plt.savefig(os.path.join(RESULT_DIR, "resnet34_fc_only_accuracy_curve.png"))
     plt.close()
 
     print("Saved learning curves in results folder.")
@@ -242,22 +235,17 @@ def evaluate_model(model, test_loader, test_dataset, device):
     print(f"Test F1-score : {f1:.4f}")
 
     result = {
-        "experiment": "ResNet18 pretrained - full fine-tuning",
-        "backbone": "ResNet18",
-        "pretrained": True,
-        "fine_tuning": "full",
-        "epochs": NUM_EPOCHS,
-        "learning_rate": LEARNING_RATE,
+        "experiment": "ResNet34 pretrained - FC only",
         "accuracy": accuracy,
         "precision": precision,
         "recall": recall,
         "f1_score": f1
     }
 
-    with open(os.path.join(RESULT_DIR, "resnet18_full_result.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(RESULT_DIR, "resnet34_fc_only_result.json"), "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2)
 
-    print("Saved test result: results/resnet18_full_result.json")
+    print("Saved test result: results/resnet34_fc_only_result.json")
 
 
 if __name__ == "__main__":

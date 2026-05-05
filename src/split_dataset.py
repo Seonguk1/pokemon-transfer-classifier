@@ -1,5 +1,3 @@
-# src/split_dataset.py
-
 import os
 import shutil
 import random

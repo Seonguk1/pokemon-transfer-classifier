@@ -1,0 +1,12 @@
+{
+  "experiment": "MobileNetV2 pretrained - full fine-tuning",
+  "backbone": "MobileNetV2",
+  "pretrained": true,
+  "fine_tuning": "full",
+  "epochs": 5,
+  "learning_rate": 0.0001,
+  "accuracy": 0.9163793103448276,
+  "precision": 0.9270438080438081,
+  "recall": 0.9119360269360269,
+  "f1_score": 0.9112134387227268
+}

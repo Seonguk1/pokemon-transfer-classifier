@@ -1,5 +1,3 @@
-# src/train_resnet18.py
-
 import os
 import json
 import copy

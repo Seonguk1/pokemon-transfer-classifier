@@ -1,5 +1,3 @@
-# src/predict.py
-
 import argparse
 import json
 import torch

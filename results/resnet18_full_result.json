@@ -1,0 +1,12 @@
+{
+  "experiment": "ResNet18 pretrained - full fine-tuning",
+  "backbone": "ResNet18",
+  "pretrained": true,
+  "fine_tuning": "full",
+  "epochs": 5,
+  "learning_rate": 0.0001,
+  "accuracy": 0.9482758620689655,
+  "precision": 0.9509285714285716,
+  "recall": 0.9476606541606543,
+  "f1_score": 0.9464562332518991
+}
